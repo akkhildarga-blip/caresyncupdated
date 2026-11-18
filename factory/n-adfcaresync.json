@@ -1,0 +1,15 @@
+{
+	"name": "n-adfcaresync",
+	"properties": {
+		"trustModeClaimForMi": {
+			"value": "Disabled",
+			"editable": true
+		}
+	},
+	"location": "southeastasia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "d7a23369-f10a-4d40-a0ad-0c106d802f40",
+		"tenantId": "75a194d8-8758-424f-af3d-397b8b21588f"
+	}
+}
