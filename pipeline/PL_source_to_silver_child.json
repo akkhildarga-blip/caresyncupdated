@@ -77,7 +77,7 @@
 					"source": {
 						"type": "PostgreSqlV2Source",
 						"query": {
-							"value": "select * from PUBLIC @{activity('Read table details').output.value[0].source_table_name}",
+							"value": "select * from PUBLIC.@{activity('Read table details').output.value[0].source_table_name}",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
@@ -120,6 +120,88 @@
 						}
 					}
 				]
+			},
+			{
+				"name": "landing_to_bronze",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Copy data1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/caresync/caresyncupdated/landing_to_bronze",
+					"baseParameters": {
+						"landing_timestamp": {
+							"value": "@variables('start time')",
+							"type": "Expression"
+						},
+						"source_system": {
+							"value": "@activity('Read table details').output[0].source_system",
+							"type": "Expression"
+						},
+						"source_file_format": {
+							"value": "@activity('Read table details').output[0].source_file_format",
+							"type": "Expression"
+						},
+						"table_name": {
+							"value": "@activity('Read table details').output[0].table_name",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_databrciks",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "bronze_to_silver",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "landing_to_bronze",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/caresync/caresyncupdated/bronze_to_silver",
+					"baseParameters": {
+						"landing_timestamp": {
+							"value": "@variables('start time')",
+							"type": "Expression"
+						},
+						"table_name": {
+							"value": "@activity('Read table details').output[0].silver_table_name",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_databrciks",
+					"type": "LinkedServiceReference"
+				}
 			}
 		],
 		"parameters": {
